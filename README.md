@@ -491,21 +491,14 @@ export const RootNavigator: React.FC = () => {
     );
   }
 
+  /* Created two satck navigator one for AuthNavigator when user is logged in and other for   Unauthnavigator when user is not logged in */
+
+  const AuthStack = createNativeStackNavigator(); // HomeScreen
+  const UnauthStack = createNativeStackNavigator(); // Login & Signup
   return (
     <NavigationIndependentTree>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {!state.isSignedIn ? (
-            // Unauthenticated screens
-            <>
-              <Stack.Screen name="Login" component={LoginScreenNav} />
-              <Stack.Screen name="Signup" component={SignupScreenNav} />
-            </>
-          ) : (
-            // Authenticated screens
-            <Stack.Screen name="Home" component={HomeScreenNav} />
-          )}
-        </Stack.Navigator>
+        {state.isSignedIn ? <AuthNavigator /> : <UnauthNavigator />}
       </NavigationContainer>
     </NavigationIndependentTree>
   );
@@ -655,9 +648,9 @@ Navigation automatically redirects to Home screen
 
 **Token Management**:
 - **Generated on**: Successful login
-- **Expiry**: 1 day from login. It can be set any time
+- **Expiry**:  I have set token expiry for 1day. I have added video by setting token expiry time to 2min to check session expiry.
 - **Storage**: `expo-secure-store` (encrypted, not AsyncStorage)
-- **Sent in**: jwttoken header `Bearer <token>`
+- **Sent in**: 'jwttoken' header without Bearer.
 - **Cleared on**: Logout
 
 **Code Example**:
@@ -972,7 +965,7 @@ npm run lint           # Run linter
 
 ---
 
-**Status**: ✅ Ready for Production  
+**Status**: ✅ Ready for Review  
 **Last Updated**: March 2026
 
 
