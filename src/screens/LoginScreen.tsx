@@ -1,17 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { useAuthViewModel } from '@/auth/viewmodels/AuthViewModel';
 import Loader from '@/components/ui/loader';
 import { styles } from '../assets/style/loginScreenStyle';
 
-interface LoginScreenProps {
-  onNavigateToSignup: () => void;
-}
-
-const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignup }) => {
+const LoginScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
   const authVM = useAuthViewModel();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,6 +18,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignup }) => {
   const passwordInputRef = useRef<TextInput>(null);
 
   const handleLogin = async () => {
+    // Clear all previous errors first before proceeding
+    setFieldErrors({});
+    authVM.clearError();
+
     const validation = authVM.validateLoginForm(email, password);
 
     if (!validation.isValid) {
@@ -32,7 +34,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignup }) => {
     }
 
     try {
-      setFieldErrors({});
       await authVM.login(email, password);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
@@ -124,7 +125,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onNavigateToSignup }) => {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={onNavigateToSignup} disabled={authVM.isLoading}>
+          <TouchableOpacity onPress={() => navigation.navigate('Signup')} disabled={authVM.isLoading}>
             <Text style={styles.link}>Create one</Text>
           </TouchableOpacity>
         </View>

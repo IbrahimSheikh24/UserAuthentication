@@ -1,7 +1,7 @@
-import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { useAuth } from '@/auth/context/AuthContext';
 import { HomeScreen } from '@/screens/HomeScreen';
@@ -10,19 +10,63 @@ import { SignupScreen } from '@/screens/SignupScreen';
 import { styles } from '../assets/style/rootStyle';
 import { colors } from '../assets/theme';
 
-export type RootStackParamList = {
-  Login: undefined;
-  Signup: undefined;
-  Home: undefined;
-};
+// Create separate stacks for authenticated and unauthenticated flows
+const AuthStack = createNativeStackNavigator();
+const UnauthStack = createNativeStackNavigator();
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+/**
+ * Unauthenticated Stack (Login & Signup)
+ * Used when user is NOT logged in
+ */
+const UnauthNavigator = () => (
+  <UnauthStack.Navigator
+    initialRouteName='Login'
+    screenOptions={{
+      headerShown: false,
+      animation: 'none',
+    }}
+  >
+    <UnauthStack.Screen 
+      name="Login" 
+      component={LoginScreen}
+      options={{
+        contentStyle: { backgroundColor: '#fff' },
+      }}
+    />
+    <UnauthStack.Screen 
+      name="Signup" 
+      component={SignupScreen}
+      options={{
+        contentStyle: { backgroundColor: '#fff' },
+      }}
+    />
+  </UnauthStack.Navigator>
+);
+
+/**
+ * Authenticated Stack (Home)
+ * Used when user IS logged in
+ */
+const AuthNavigator = () => (
+  <AuthStack.Navigator
+    screenOptions={{
+      headerShown: false,
+    }}
+  >
+    <AuthStack.Screen 
+      name="Home" 
+      component={HomeScreen}
+      options={{
+        contentStyle: { backgroundColor: '#fff' },
+      }}
+    />
+  </AuthStack.Navigator>
+);
 
 export const RootNavigator: React.FC = () => {
   const { state } = useAuth();
 
   // Show splash/loading screen ONLY during initial bootstrap on app startup
-  // Once bootstrap is complete, let individual screens handle their own loading states
   if (state.isBootstrapping) {
     return (
       <View style={styles.splashContainer}>
@@ -34,33 +78,8 @@ export const RootNavigator: React.FC = () => {
   return (
     <NavigationIndependentTree>
       <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          {!state.isSignedIn ? (
-            <>
-              <Stack.Screen name="Login" component={LoginScreenNav} />
-              <Stack.Screen name="Signup" component={SignupScreenNav} />
-            </>
-          ) : (
-            <Stack.Screen name="Home" component={HomeScreenNav} />
-          )}
-        </Stack.Navigator>
+        {state.isSignedIn ? <AuthNavigator /> : <UnauthNavigator />}
       </NavigationContainer>
     </NavigationIndependentTree>
   );
 };
-
-const LoginScreenNav: React.FC<{ navigation: any }> = ({ navigation }) => (
-  <LoginScreen onNavigateToSignup={() => navigation.navigate('Signup')} />
-);
-
-const SignupScreenNav: React.FC<{ navigation: any }> = ({ navigation }) => (
-  <SignupScreen onNavigateToLogin={() => navigation.navigate('Login')} />
-);
-
-const HomeScreenNav: React.FC<{ navigation: any }> = ({ navigation }) => (
-  <HomeScreen onNavigateToLogin={() => {}} />
-);

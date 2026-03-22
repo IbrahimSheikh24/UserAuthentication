@@ -1,6 +1,7 @@
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { getStoredAuthToken, setAuthToken } from '@/utils/api';
 import * as SecureStore from 'expo-secure-store';
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+
 import { useGetUserByTokenAPI, useLoginAPI, useLogoutAPI, useSignupAPI } from '../hooks/useAuthAPI';
 import { AuthContextType, AuthState } from '../models/AuthState';
 
@@ -159,11 +160,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [logoutApi]);
 
+  const clearError = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      error: null,
+    }));
+  }, []);
+
   const value: AuthContextType = {
     state,
     login,
     signup,
     logout,
+    clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

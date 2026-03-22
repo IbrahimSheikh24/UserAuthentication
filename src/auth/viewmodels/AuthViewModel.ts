@@ -47,6 +47,7 @@ export interface AuthViewModelActions {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  clearError: () => void;
 }
 
 export interface AuthViewModelDerivedState {
@@ -63,7 +64,7 @@ export interface AuthViewModel
 
 export const useAuthViewModel = (): AuthViewModel => {
   // Global state - single source of truth
-  const { state, login: contextLogin, signup: contextSignup, logout: contextLogout } = useAuth();
+  const { state, login: contextLogin, signup: contextSignup, logout: contextLogout, clearError: contextClearError } = useAuth();
 
   // ============ VALIDATION LOGIC ============
 
@@ -191,6 +192,11 @@ export const useAuthViewModel = (): AuthViewModel => {
     }
   }, [contextLogout]);
 
+  const clearError = useCallback(() => {
+    // Call context to clear error state
+    contextClearError();
+  }, [contextClearError]);
+
   // ============ DERIVED STATE (Memoized Selectors) ============
 
   const isLoggedIn = useMemo(
@@ -238,6 +244,7 @@ export const useAuthViewModel = (): AuthViewModel => {
     login,
     signup,
     logout,
+    clearError,
 
     // Derived State
     isLoggedIn,

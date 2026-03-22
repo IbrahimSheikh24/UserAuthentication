@@ -1,17 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { useAuthViewModel } from '@/auth/viewmodels/AuthViewModel';
 import Loader from '@/components/ui/loader';
 import { styles } from '../assets/style/signupScreeStyle';
 
-interface SignupScreenProps {
-  onNavigateToLogin: () => void;
-}
-
-const SignupScreen: React.FC<SignupScreenProps> = ({ onNavigateToLogin }) => {
+const SignupScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
   const authVM = useAuthViewModel();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -23,6 +21,10 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onNavigateToLogin }) => {
   const passwordInputRef = useRef<TextInput>(null);
 
   const handleSignup = async () => {
+    // Clear all previous errors first before proceeding
+    setFieldErrors({});
+    authVM.clearError();
+
     const validation = authVM.validateSignupForm(name, email, password);
 
     if (!validation.isValid) {
@@ -35,7 +37,6 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onNavigateToLogin }) => {
     }
 
     try {
-      setFieldErrors({});
       await authVM.signup(name, email, password);
       // Show success message
       setSignupSuccess(true);
@@ -61,7 +62,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onNavigateToLogin }) => {
           style={styles.button}
           onPress={() => {
             setSignupSuccess(false);
-            onNavigateToLogin();
+            navigation.navigate('Login');
           }}
         >
           <Text style={styles.buttonText}>Go to Login</Text>
@@ -171,13 +172,13 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onNavigateToLogin }) => {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account? </Text>
-          <TouchableOpacity onPress={onNavigateToLogin} disabled={authVM.isLoading}>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')} disabled={authVM.isLoading}>
             <Text style={styles.link}>Sign in</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>
 
-      {/* Loading overlay - positioned absolutely on top */}
+      {/* Loading overlay */}
       {authVM.isLoading && (
         <Loader size='large' color='blue' />
       )}

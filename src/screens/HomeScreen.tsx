@@ -7,11 +7,7 @@ import { useAuthViewModel } from '@/auth/viewmodels/AuthViewModel';
 import { useHomeViewModel } from '@/auth/viewmodels/HomeViewModel';
 import { styles } from '../assets/style/homeScreenStyle';
 
-interface HomeScreenProps {
-  onNavigateToLogin: () => void;
-}
-
-const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToLogin }) => {
+const HomeScreen: React.FC = () => {
   const viewModel = useHomeViewModel();
   const authVM = useAuthViewModel();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
